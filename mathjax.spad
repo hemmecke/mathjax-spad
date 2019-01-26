@@ -87,12 +87,12 @@ function call with arguments.
 \subsection{The \spadtype{MathJaxFormat} domain}
 )endif
 
-)abbrev domain MATHJAX MathJaxFormat
+)abbrev domain TEX TexFormat
 ++ \spadtype{MathJaxFormat} provides a coercion from \spadtype{OutputForm} to
 ++ \TeX{} format. The particular dialect of \TeX{} used is \LaTeX{},
 ++ but the target interpreter is actually MathJax
 ++ \url{https://www.mathjax.org}.
-MathJaxFormat: public == private where
+TexFormat: public == private where
   E       ==> OutputForm
   I       ==> Integer
   L       ==> List
@@ -254,7 +254,7 @@ MathJaxFormat: public == private where
     import from List String
     import from OutputFormTools
 
-    sayExpr(s: S): Void == sayMathJax(s)$Lisp
+    sayExpr(s: S): Void == sayTeX(s)$Lisp
 
     Rep ==> Record(prolog: LS, fmt: LS, epilog: LS)
     import from Rep
