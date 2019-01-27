@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
 ---
 --- FriCAS MathJaxFormat
---- Copyright (C) 2015, 2017,  Ralf Hemmecke <ralf@hemmecke.org>
+--- Copyright (C) 2015, 2017, 2019  Ralf Hemmecke <ralf@hemmecke.org>
 ---
 -------------------------------------------------------------------
 -- This program is free software: you can redistribute it and/or modify
@@ -118,6 +118,14 @@ TexFormat: public == private where
       ++ components of this object.
     prologue: % -> LS
       ++ \spad{prologue(t)} extracts the prologue section of a TeX form t.
+    setDefaultEpilogue!: LS -> LS
+      ++ Set the epilog that is used by default in the coerce function.
+      ++ Between the elements of the list the stepnumber will be inserted.
+      ++ The old default epilogue is returned.
+    setDefaultPrologue!: LS -> LS
+      ++ Set the prolog that is used by default in the coerce function.
+      ++ Between the elements of the list the stepnumber will be inserted.
+      ++ The old default prologue is returned.
     setEpilogue!: (%, LS) -> LS
       ++ \spad{setEpilogue!(t, strings)} sets the epilogue section of
       ++ a TeX form t to strings.
@@ -262,6 +270,14 @@ TexFormat: public == private where
     per x ==> (x@Rep) pretend %
 
 )if LiterateDoc
+By default the MathJax part is introduced by
+\verb'$$' and ended also by \verb'$$'.
+)endif
+
+    defaultPrologue: Reference(LS) := ref ["$$"];
+    defaultEpilogue: Reference(LS) := ref ["$$"];
+
+)if LiterateDoc
 Precedence of operators is used to decide whether or not to put parentheses
 around an expression.
 We fix minimal and maximal precedence, although it would be possible to
@@ -319,10 +335,17 @@ other characters inbetween. The \verb'"+"' will be removed.
 gets the session step number as an argument.
 )endif
 
+    insert(s: S, def: LS): LS ==
+        l: LS := empty()$LS
+        empty? def => return l
+        l := [first def]
+        for x in rest def repeat l := concat(l, [s, x]$LS)
+        l
+
     newStructure(num: S): % == per
-        [["$$"]$LS,_
+        [insert(num, deref defaultPrologue),_
          empty()$LS,_
-         ["$$"]$LS]
+         insert(num, deref defaultEpilogue)]
 
     -- public function definitions
     new(): % == newStructure("")
@@ -330,6 +353,16 @@ gets the session step number as an argument.
     prologue(f: %): LS == rep(f).prolog
     format(f: %): LS  == rep(f).fmt
     epilogue(f: %): LS == rep(f).epilog
+
+    setDefaultEpilogue!(l: LS): LS ==
+        def: LS := deref defaultEpilogue
+        setelt!(defaultEpilogue, l)
+        def
+
+    setDefaultPrologue!(l: LS): LS ==
+        def: LS := deref defaultPrologue
+        setelt!(defaultPrologue, l)
+        def
 
     setPrologue!(f: %, l: LS): LS == rep(f).prolog := l
     setTex!(f: %, l: LS): LS  == rep(f).fmt := l
